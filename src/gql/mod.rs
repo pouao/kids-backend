@@ -23,6 +23,6 @@ pub async fn build_schema() -> Schema<QueryRoot, MutationRoot, EmptySubscription
 
 pub async fn giql() -> impl IntoResponse {
     response::Html(
-        GraphiQLSource::build().endpoint(CFG.get("GQL_URI").unwrap()).finish(),
+        GraphiQLSource::build().endpoint(CFG.get("GQL_PATH").unwrap()).finish(),
     )
 }

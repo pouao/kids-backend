@@ -16,16 +16,16 @@ lazy_static! {
         let mut map = HashMap::new();
 
         map.insert(
-            "ADDR",
-            dotenvy::var("ADDR").expect("Expected ADDR to be set in env!"),
+            "HOST",
+            dotenvy::var("HOST").expect("Expected HOST to be set in env!"),
         );
         map.insert(
             "PORT",
             dotenvy::var("PORT").expect("Expected PORT to be set in env!"),
         );
         map.insert(
-            "GQL_URI",
-            dotenvy::var("GQL_URI").expect("Expected GQL_URI to be set in env!"),
+            "GQL_PATH",
+            dotenvy::var("GQL_PATH").expect("Expected GQL_PATH to be set in env!"),
         );
 
         map.insert(

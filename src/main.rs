@@ -13,22 +13,22 @@ async fn main() {
     let app_state = Arc::new(AppState {});
     let app_router = Router::new()
         .route(
-            CFG.get("GQL_URI").unwrap(),
+            CFG.get("GQL_PATH").unwrap(),
             get(giql).post_service(GraphQL::new(schema)),
         )
         .with_state(app_state);
 
     let listener = tokio::net::TcpListener::bind(format!(
         "{}:{}",
-        CFG.get("ADDR").unwrap(),
+        CFG.get("HOST").unwrap(),
         CFG.get("PORT").unwrap()
     ))
     .await
     .unwrap();
     tracing::info!(
-        "odds gql-server: http://{}{}",
+        "kids gql-server: http://{}{}",
         listener.local_addr().unwrap(),
-        CFG.get("GQL_URI").unwrap()
+        CFG.get("GQL_PATH").unwrap()
     );
     axum::serve(listener, app_router).await.unwrap()
 }
