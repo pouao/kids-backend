@@ -685,8 +685,11 @@ pub async fn file_by_kind_project_id(
         doc! {"_id": {"$in": file_ids}, "kind": file_kind as i32};
 
     let coll = db.collection::<Document>("files");
-    let file_document =
-        coll.find_one(filter_doc).await.expect("账户不存在").unwrap();
+    let file_document = coll
+        .find_one(filter_doc)
+        .await
+        .expect("账户不存在")
+        .unwrap();
 
     let file: File = from_document(file_document)?;
     Ok(file)

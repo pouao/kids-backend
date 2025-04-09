@@ -1,16 +1,8 @@
-edition = "2024"
-
 max_width = 70
 array_width = 30
 
-indent_style = "Block"
-imports_indent = "Block"
-use_small_heuristics = "Max"
-
 reorder_modules = false
 reorder_imports = false
-merge_derives = true
 
-error_on_line_overflow = true
-# error_on_unformatted = true
 error_on_unformatted = false
+error_on_line_overflow = false
