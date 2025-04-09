@@ -2,15 +2,15 @@ pub mod queries;
 pub mod mutations;
 
 use axum::response::{self, IntoResponse};
-use async_graphql::{Schema, EmptySubscription,http::GraphiQLSource};
+use async_graphql::{Schema, EmptySubscription, http::GraphiQLSource};
 
 use crate::util::constant::CFG;
 use crate::dbs::mongo;
 use crate::gql::queries::QueryRoot;
 use crate::gql::mutations::MutationRoot;
 
-pub async fn build_schema() -> Schema<QueryRoot, MutationRoot, EmptySubscription>
-{
+pub async fn build_schema()
+-> Schema<QueryRoot, MutationRoot, EmptySubscription> {
     // get mongodb datasource. It can be added to:
     // 1. As global data for async-graphql.
     // 2. As application scope state of Tide
@@ -23,6 +23,8 @@ pub async fn build_schema() -> Schema<QueryRoot, MutationRoot, EmptySubscription
 
 pub async fn giql() -> impl IntoResponse {
     response::Html(
-        GraphiQLSource::build().endpoint(CFG.get("GQL_PATH").unwrap()).finish(),
+        GraphiQLSource::build()
+            .endpoint(CFG.get("GQL_PATH").unwrap())
+            .finish(),
     )
 }

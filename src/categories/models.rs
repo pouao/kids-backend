@@ -6,7 +6,9 @@ use crate::util::{constant::GqlResult, pagination::ProjectsResult};
 
 use crate::projects::services::projects_by_category_id;
 
-#[derive(async_graphql::SimpleObject, Serialize, Deserialize, Clone, Debug)]
+#[derive(
+    async_graphql::SimpleObject, Serialize, Deserialize, Clone, Debug,
+)]
 #[graphql(complex)]
 pub struct Category {
     pub _id: ObjectId,
@@ -42,7 +44,9 @@ pub struct CategoryNew {
     pub slug: String,
 }
 
-#[derive(async_graphql::SimpleObject, Serialize, Deserialize, Clone, Debug)]
+#[derive(
+    async_graphql::SimpleObject, Serialize, Deserialize, Clone, Debug,
+)]
 pub struct CategoryUser {
     pub _id: ObjectId,
     pub user_id: ObjectId,

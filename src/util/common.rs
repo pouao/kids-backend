@@ -22,7 +22,9 @@ pub async fn slugify(str: &str) -> String {
 // bson::DateTime -> Y-M-D
 pub async fn bson_dt_nyr(dt: mongodb::bson::DateTime) -> String {
     dt.to_chrono()
-        .with_timezone(&chrono::FixedOffset::east_opt(8 * 3600).unwrap())
+        .with_timezone(
+            &chrono::FixedOffset::east_opt(8 * 3600).unwrap(),
+        )
         .format(crate::util::constant::DTF_YMD)
         .to_string()
 }

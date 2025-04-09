@@ -73,7 +73,10 @@ impl QueryRoot {
         status: i8,
     ) -> GqlResult<UsersResult> {
         let db = &ctx.data_unchecked::<DataSource>().db;
-        users::services::users(db, from_page, first_oid, last_oid, status).await
+        users::services::users(
+            db, from_page, first_oid, last_oid, status,
+        )
+        .await
     }
 
     // Get project by its id
@@ -105,8 +108,10 @@ impl QueryRoot {
         status: i8,
     ) -> GqlResult<ProjectsResult> {
         let db = &ctx.data_unchecked::<DataSource>().db;
-        projects::services::projects(db, from_page, first_oid, last_oid, status)
-            .await
+        projects::services::projects(
+            db, from_page, first_oid, last_oid, status,
+        )
+        .await
     }
 
     async fn projects_in_position(
@@ -117,8 +122,10 @@ impl QueryRoot {
         limit: i64,
     ) -> GqlResult<Vec<Project>> {
         let db = &ctx.data_unchecked::<DataSource>().db;
-        projects::services::projects_in_position(db, username, position, limit)
-            .await
+        projects::services::projects_in_position(
+            db, username, position, limit,
+        )
+        .await
     }
 
     // Get all projects of one user by user_id
@@ -261,12 +268,17 @@ impl QueryRoot {
         project_id: ObjectId,
     ) -> GqlResult<File> {
         let db = &ctx.data_unchecked::<DataSource>().db;
-        projects::services::file_by_kind_project_id(db, file_kind, project_id)
-            .await
+        projects::services::file_by_kind_project_id(
+            db, file_kind, project_id,
+        )
+        .await
     }
 
     // Get all categories
-    async fn categories(&self, ctx: &Context<'_>) -> GqlResult<Vec<Category>> {
+    async fn categories(
+        &self,
+        ctx: &Context<'_>,
+    ) -> GqlResult<Vec<Category>> {
         let db = &ctx.data_unchecked::<DataSource>().db;
         categories::services::categories(db).await
     }
@@ -288,7 +300,8 @@ impl QueryRoot {
         username: String,
     ) -> GqlResult<Vec<Category>> {
         let db = &ctx.data_unchecked::<DataSource>().db;
-        categories::services::categories_by_username(db, username).await
+        categories::services::categories_by_username(db, username)
+            .await
     }
 
     // Get category by its id
@@ -332,7 +345,10 @@ impl QueryRoot {
     }
 
     // get all topics
-    async fn topics(&self, ctx: &Context<'_>) -> GqlResult<Vec<Topic>> {
+    async fn topics(
+        &self,
+        ctx: &Context<'_>,
+    ) -> GqlResult<Vec<Topic>> {
         let db = &ctx.data_unchecked::<DataSource>().db;
         topics::services::topics(db).await
     }

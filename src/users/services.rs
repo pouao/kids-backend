@@ -2,8 +2,8 @@ use futures::stream::StreamExt;
 use mongodb::{
     Database,
     bson::{
-        oid::ObjectId, DateTime, Document, doc, from_document, to_document,
-        from_bson,
+        oid::ObjectId, DateTime, Document, doc, from_document,
+        to_document, from_bson,
     },
 };
 use async_graphql::{Error, ErrorExtensions};
@@ -33,16 +33,20 @@ pub async fn user_register(
     user_new.username = user_new.username.trim().to_lowercase();
 
     if user_by_email(db, user_new.email.to_owned()).await.is_err()
-        && user_by_username(db, user_new.username.to_owned()).await.is_err()
+        && user_by_username(db, user_new.username.to_owned())
+            .await
+            .is_err()
     {
-        user_new.cred = cred_encode(&user_new.username, &user_new.cred).await;
+        user_new.cred =
+            cred_encode(&user_new.username, &user_new.cred).await;
 
         let mut new_document = to_document(&user_new)?;
         let now = DateTime::now();
         new_document.insert("created_at", now);
         new_document.insert("updated_at", now);
 
-        let user_res = coll.insert_one(new_document).await.expect("写入未成功");
+        let user_res =
+            coll.insert_one(new_document).await.expect("写入未成功");
         let user_id = from_bson(user_res.inserted_id)?;
 
         user_by_id(db, user_id).await
@@ -69,13 +73,20 @@ pub async fn user_sign_in(
     if let Ok(user) = user_res {
         match user.status {
             1..=10 => {
-                let is_verified =
-                    cred_verify(&user.username, &password, &user.cred).await;
+                let is_verified = cred_verify(
+                    &user.username,
+                    &password,
+                    &user.cred,
+                )
+                .await;
                 if is_verified {
                     let site_kid = CFG.get("SITE_KID").unwrap();
-                    let site_key = CFG.get("SITE_KEY").unwrap().as_bytes();
-                    let claim_exp =
-                        CFG.get("CLAIM_EXP").unwrap().parse::<usize>()?;
+                    let site_key =
+                        CFG.get("SITE_KEY").unwrap().as_bytes();
+                    let claim_exp = CFG
+                        .get("CLAIM_EXP")
+                        .unwrap()
+                        .parse::<usize>()?;
 
                     let mut header = Header::default();
                     header.kid = Some(String::from(site_kid));
@@ -103,7 +114,9 @@ pub async fn user_sign_in(
                 }
             }
             0 => Err(Error::new("sign-in-not-activation")
-                .extend_with(|_, e| e.set("user_id", user._id.to_string()))),
+                .extend_with(|_, e| {
+                    e.set("user_id", user._id.to_string())
+                })),
             -1 => Err(Error::new("sign-in-banned")),
             _ => Err(Error::new("sign-in-security-problem")),
         }
@@ -113,11 +126,17 @@ pub async fn user_sign_in(
 }
 
 // get user info by id
-pub async fn user_by_id(db: &Database, id: ObjectId) -> GqlResult<User> {
+pub async fn user_by_id(
+    db: &Database,
+    id: ObjectId,
+) -> GqlResult<User> {
     let coll = db.collection::<Document>("users");
 
-    let user_document =
-        coll.find_one(doc! {"_id": id}).await.expect("账户不存在").unwrap();
+    let user_document = coll
+        .find_one(doc! {"_id": id})
+        .await
+        .expect("账户不存在")
+        .unwrap();
 
     let user: User = from_document(user_document)?;
     Ok(user)
@@ -145,7 +164,10 @@ pub async fn user_update_one_field_by_id(
 }
 
 // get user info by email
-pub async fn user_by_email(db: &Database, email: String) -> GqlResult<User> {
+pub async fn user_by_email(
+    db: &Database,
+    email: String,
+) -> GqlResult<User> {
     let coll = db.collection::<Document>("users");
 
     let user_document = coll.find_one(doc! {"email": &email}).await?;
@@ -164,7 +186,8 @@ pub async fn user_by_username(
 ) -> GqlResult<User> {
     let coll = db.collection::<Document>("users");
 
-    let user_document = coll.find_one(doc! {"username": &username}).await?;
+    let user_document =
+        coll.find_one(doc! {"username": &username}).await?;
     if user_document.is_some() {
         let user: User = from_document(user_document.unwrap())?;
         Ok(user)
@@ -185,8 +208,10 @@ pub async fn user_change_password(
         let email = data.claims.email;
         let user_res = user_by_email(db, email).await;
         if let Ok(mut user) = user_res {
-            if cred_verify(&user.username, &pwd_cur, &user.cred).await {
-                user.cred = cred_encode(&user.username, &pwd_new).await;
+            if cred_verify(&user.username, &pwd_cur, &user.cred).await
+            {
+                user.cred =
+                    cred_encode(&user.username, &pwd_new).await;
 
                 let coll = db.collection::<Document>("users");
                 coll.update_one(
@@ -226,9 +251,12 @@ pub async fn user_update_profile(
 
             let user_document = to_document(&user)?;
 
-            coll.find_one_and_replace(doc! {"_id": &user._id}, user_document)
-                .await
-                .expect("更新未成功");
+            coll.find_one_and_replace(
+                doc! {"_id": &user._id},
+                user_document,
+            )
+            .await
+            .expect("更新未成功");
 
             Ok(user)
         } else {
@@ -257,7 +285,8 @@ pub async fn users(
     };
 
     let (pages_count, total_count) =
-        count_pages_and_total(&coll, Some(filter_doc.clone()), None).await;
+        count_pages_and_total(&coll, Some(filter_doc.clone()), None)
+            .await;
     let (current_page, skip_x) = calculate_current_filter_skip(
         from_page,
         first_oid,
@@ -269,7 +298,8 @@ pub async fn users(
     let sort_doc = doc! {"_id": -1};
     let find_options = find_options(Some(sort_doc), skip_x).await;
 
-    let mut cursor = coll.find(filter_doc).with_options(find_options).await?;
+    let mut cursor =
+        coll.find(filter_doc).with_options(find_options).await?;
 
     let mut users: Vec<User> = vec![];
     while let Some(result) = cursor.next().await {
@@ -310,7 +340,10 @@ pub async fn users(
 }
 
 // Create new wish
-pub async fn wish_new(db: &Database, wish_new: WishNew) -> GqlResult<Wish> {
+pub async fn wish_new(
+    db: &Database,
+    wish_new: WishNew,
+) -> GqlResult<Wish> {
     let coll = db.collection::<Document>("wishes");
 
     let exist_document = coll
@@ -325,7 +358,8 @@ pub async fn wish_new(db: &Database, wish_new: WishNew) -> GqlResult<Wish> {
         new_document.insert("created_at", now);
         new_document.insert("updated_at", now);
 
-        let wish_res = coll.insert_one(new_document).await.expect("写入未成功");
+        let wish_res =
+            coll.insert_one(new_document).await.expect("写入未成功");
         let wish_id = from_bson(wish_res.inserted_id)?;
 
         wish_by_id(db, wish_id).await
@@ -338,15 +372,21 @@ pub async fn wish_new(db: &Database, wish_new: WishNew) -> GqlResult<Wish> {
 async fn wish_by_id(db: &Database, id: ObjectId) -> GqlResult<Wish> {
     let coll = db.collection::<Document>("wishes");
 
-    let wish_document =
-        coll.find_one(doc! {"_id": id}).await.expect("查询未成功").unwrap();
+    let wish_document = coll
+        .find_one(doc! {"_id": id})
+        .await
+        .expect("查询未成功")
+        .unwrap();
 
     let wish: Wish = from_document(wish_document)?;
     Ok(wish)
 }
 
 // get all wishes
-pub async fn wishes(db: &Database, published: i8) -> GqlResult<Vec<Wish>> {
+pub async fn wishes(
+    db: &Database,
+    published: i8,
+) -> GqlResult<Vec<Wish>> {
     let mut filter_doc = doc! {};
     if published > 0 {
         filter_doc.insert("published", true);
@@ -373,7 +413,10 @@ pub async fn wishes(db: &Database, published: i8) -> GqlResult<Vec<Wish>> {
 }
 
 // get random wish
-pub async fn wish_random(db: &Database, username: String) -> GqlResult<Wish> {
+pub async fn wish_random(
+    db: &Database,
+    username: String,
+) -> GqlResult<Wish> {
     let mut filter_doc = doc! {"published": true};
     if "".ne(username.trim()) && "-".ne(username.trim()) {
         let user = user_by_username(db, username).await?;
@@ -389,10 +432,17 @@ pub async fn wish_random(db: &Database, username: String) -> GqlResult<Wish> {
     }
 }
 
-async fn wish_one(db: &Database, match_doc: Document) -> GqlResult<Wish> {
+async fn wish_one(
+    db: &Database,
+    match_doc: Document,
+) -> GqlResult<Wish> {
     let coll = db.collection::<Document>("wishes");
-    let mut cursor =
-        coll.aggregate(vec![doc! {"$sample": {"size": 1}}, match_doc]).await?;
+    let mut cursor = coll
+        .aggregate(vec![
+            doc! {"$sample": {"size": 1}},
+            match_doc,
+        ])
+        .await?;
 
     if let Some(document_res) = cursor.next().await {
         let wish = from_document(document_res?)?;

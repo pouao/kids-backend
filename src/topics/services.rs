@@ -2,8 +2,8 @@ use futures::stream::StreamExt;
 use mongodb::{
     Database,
     bson::{
-        oid::ObjectId, Document, doc, from_document, to_document, from_bson,
-        DateTime,
+        oid::ObjectId, Document, doc, from_document, to_document,
+        from_bson, DateTime,
     },
 };
 use async_graphql::Error;
@@ -12,7 +12,8 @@ use crate::util::{constant::GqlResult, common::slugify};
 
 use crate::users;
 use super::models::{
-    Topic, TopicNew, TopicUser, TopicUserNew, TopicProject, TopicProjectNew,
+    Topic, TopicNew, TopicUser, TopicUserNew, TopicProject,
+    TopicProjectNew,
 };
 
 // Create new topic
@@ -23,7 +24,8 @@ pub async fn topic_new(
     let coll = db.collection::<Document>("topics");
 
     topic_new.name = topic_new.name.trim().to_lowercase();
-    let name_check = "".ne(&topic_new.name) && "-".ne(&topic_new.name);
+    let name_check =
+        "".ne(&topic_new.name) && "-".ne(&topic_new.name);
     match name_check {
         true => {
             let exist_document =
@@ -32,16 +34,22 @@ pub async fn topic_new(
             let topic_id;
             if exist_document.is_none() {
                 let slug = slugify(&topic_new.name).await;
-                topic_new.slug =
-                    format!("{}-{}", slug, DateTime::now().timestamp_millis());
+                topic_new.slug = format!(
+                    "{}-{}",
+                    slug,
+                    DateTime::now().timestamp_millis()
+                );
 
                 let new_document = to_document(&topic_new)?;
-                let topic_res =
-                    coll.insert_one(new_document).await.expect("写入未成功");
+                let topic_res = coll
+                    .insert_one(new_document)
+                    .await
+                    .expect("写入未成功");
 
                 topic_id = from_bson(topic_res.inserted_id)?;
             } else {
-                let topic: Topic = from_document(exist_document.unwrap())?;
+                let topic: Topic =
+                    from_document(exist_document.unwrap())?;
                 coll.update_one(
                     doc! {"_id": &topic._id},
                     doc! {"$inc": {"quotes": 1}},
@@ -59,18 +67,27 @@ pub async fn topic_new(
 }
 
 // get topic info by id
-pub async fn topic_by_id(db: &Database, id: ObjectId) -> GqlResult<Topic> {
+pub async fn topic_by_id(
+    db: &Database,
+    id: ObjectId,
+) -> GqlResult<Topic> {
     let coll = db.collection::<Document>("topics");
 
-    let topic_document =
-        coll.find_one(doc! {"_id": id}).await.expect("查询未成功").unwrap();
+    let topic_document = coll
+        .find_one(doc! {"_id": id})
+        .await
+        .expect("查询未成功")
+        .unwrap();
 
     let topic: Topic = from_document(topic_document)?;
     Ok(topic)
 }
 
 // get topic info by slug
-pub async fn topic_by_slug(db: &Database, slug: String) -> GqlResult<Topic> {
+pub async fn topic_by_slug(
+    db: &Database,
+    slug: String,
+) -> GqlResult<Topic> {
     let coll = db.collection::<Document>("topics");
 
     let topic_document = coll
@@ -132,11 +149,17 @@ pub async fn topic_user_new(
 }
 
 // get topic_user by its id
-async fn topic_user_by_id(db: &Database, id: ObjectId) -> GqlResult<TopicUser> {
+async fn topic_user_by_id(
+    db: &Database,
+    id: ObjectId,
+) -> GqlResult<TopicUser> {
     let coll = db.collection::<Document>("topics_users_projects");
 
-    let topic_user_document =
-        coll.find_one(doc! {"_id": id}).await.expect("查询未成功").unwrap();
+    let topic_user_document = coll
+        .find_one(doc! {"_id": id})
+        .await
+        .expect("查询未成功")
+        .unwrap();
 
     let topic_user: TopicUser = from_document(topic_user_document)?;
     Ok(topic_user)
@@ -160,7 +183,8 @@ pub async fn topic_project_new(
         let new_document = to_document(&topic_project_new)?;
         let topic_project_res =
             coll.insert_one(new_document).await.expect("写入未成功");
-        let topic_project_id = from_bson(topic_project_res.inserted_id)?;
+        let topic_project_id =
+            from_bson(topic_project_res.inserted_id)?;
 
         topic_project_by_id(db, topic_project_id).await
     } else {
@@ -175,10 +199,14 @@ async fn topic_project_by_id(
 ) -> GqlResult<TopicProject> {
     let coll = db.collection::<Document>("topics_users_projects");
 
-    let topic_project_document =
-        coll.find_one(doc! {"_id": id}).await.expect("查询未成功").unwrap();
+    let topic_project_document = coll
+        .find_one(doc! {"_id": id})
+        .await
+        .expect("查询未成功")
+        .unwrap();
 
-    let topic_project: TopicProject = from_document(topic_project_document)?;
+    let topic_project: TopicProject =
+        from_document(topic_project_document)?;
     Ok(topic_project)
 }
 
@@ -186,7 +214,8 @@ async fn topic_project_by_id(
 pub async fn topics(db: &Database) -> GqlResult<Vec<Topic>> {
     let coll = db.collection::<Document>("topics");
 
-    let mut cursor = coll.find(doc! {}).sort(doc! {"quotes": -1}).await?;
+    let mut cursor =
+        coll.find(doc! {}).sort(doc! {"quotes": -1}).await?;
 
     let mut topics: Vec<Topic> = vec![];
     while let Some(result) = cursor.next().await {
@@ -209,7 +238,8 @@ pub async fn topics_by_project_id(
     db: &Database,
     project_id: ObjectId,
 ) -> GqlResult<Vec<Topic>> {
-    let topics_projects = topics_projects_by_project_id(db, project_id).await;
+    let topics_projects =
+        topics_projects_by_project_id(db, project_id).await;
 
     let mut topic_ids = vec![];
     for topic_project in topics_projects {
@@ -217,7 +247,8 @@ pub async fn topics_by_project_id(
     }
 
     let coll = db.collection::<Document>("topics");
-    let mut cursor = coll.find(doc! {"_id": {"$in": topic_ids}}).await?;
+    let mut cursor =
+        coll.find(doc! {"_id": {"$in": topic_ids}}).await?;
 
     let mut topics: Vec<Topic> = vec![];
     while let Some(result) = cursor.next().await {
@@ -270,7 +301,8 @@ pub async fn keywords_by_user_id(
     db: &Database,
     user_id: ObjectId,
 ) -> GqlResult<Vec<Topic>> {
-    let topics_users = topics_users_by_user_id(db, user_id, false).await;
+    let topics_users =
+        topics_users_by_user_id(db, user_id, false).await;
 
     let mut topic_ids = vec![];
     for topic_user in topics_users {
@@ -278,7 +310,8 @@ pub async fn keywords_by_user_id(
     }
 
     let coll = db.collection::<Document>("topics");
-    let mut cursor = coll.find(doc! {"_id": {"$in": topic_ids}}).await?;
+    let mut cursor =
+        coll.find(doc! {"_id": {"$in": topic_ids}}).await?;
 
     let mut topics: Vec<Topic> = vec![];
     while let Some(result) = cursor.next().await {
@@ -303,11 +336,15 @@ async fn topics_users_by_user_id(
     user_id: ObjectId,
     contain_project: bool,
 ) -> Vec<TopicUser> {
-    let coll_topics_users = db.collection::<Document>("topics_users_projects");
+    let coll_topics_users =
+        db.collection::<Document>("topics_users_projects");
 
     let mut filter_doc = doc! {"user_id": user_id};
     if !contain_project {
-        filter_doc.insert("project_id", doc! { "$exists": contain_project });
+        filter_doc.insert(
+            "project_id",
+            doc! { "$exists": contain_project },
+        );
     }
     let mut cursor_topics_users =
         coll_topics_users.find(filter_doc).await.unwrap();
@@ -316,7 +353,8 @@ async fn topics_users_by_user_id(
     while let Some(result) = cursor_topics_users.next().await {
         match result {
             Ok(document) => {
-                let topic_user: TopicUser = from_document(document).unwrap();
+                let topic_user: TopicUser =
+                    from_document(document).unwrap();
                 topics_users.push(topic_user);
             }
             Err(error) => {
@@ -333,7 +371,8 @@ pub async fn keywords_by_username(
     db: &Database,
     username: String,
 ) -> GqlResult<Vec<Topic>> {
-    let user = users::services::user_by_username(db, username).await?;
+    let user =
+        users::services::user_by_username(db, username).await?;
     keywords_by_user_id(db, user._id).await
 }
 
@@ -342,7 +381,8 @@ pub async fn topics_by_user_id(
     db: &Database,
     user_id: ObjectId,
 ) -> GqlResult<Vec<Topic>> {
-    let topics_projects = topics_users_by_user_id(db, user_id, true).await;
+    let topics_projects =
+        topics_users_by_user_id(db, user_id, true).await;
 
     let mut topic_ids_dup = vec![];
     for topic_project in topics_projects {
@@ -355,15 +395,17 @@ pub async fn topics_by_user_id(
 
     let mut topics: Vec<Topic> = vec![];
     let coll = db.collection::<Document>("topics");
-    let mut cursor = coll.find(doc! {"_id": {"$in": topic_ids}}).await?;
+    let mut cursor =
+        coll.find(doc! {"_id": {"$in": topic_ids}}).await?;
 
     while let Some(result) = cursor.next().await {
         match result {
             Ok(document) => {
                 let mut topic: Topic = from_document(document)?;
-                topic.quotes =
-                    topic_ids_dup.iter().filter(|&id| *id == topic._id).count()
-                        as i64;
+                topic.quotes = topic_ids_dup
+                    .iter()
+                    .filter(|&id| *id == topic._id)
+                    .count() as i64;
                 topics.push(topic);
             }
             Err(error) => {
@@ -381,6 +423,7 @@ pub async fn topics_by_username(
     db: &Database,
     username: String,
 ) -> GqlResult<Vec<Topic>> {
-    let user = users::services::user_by_username(db, username).await?;
+    let user =
+        users::services::user_by_username(db, username).await?;
     topics_by_user_id(db, user._id).await
 }

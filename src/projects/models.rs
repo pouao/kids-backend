@@ -11,7 +11,9 @@ use crate::{
     users::{self, models::User},
 };
 
-#[derive(async_graphql::SimpleObject, Serialize, Deserialize, Clone, Debug)]
+#[derive(
+    async_graphql::SimpleObject, Serialize, Deserialize, Clone, Debug,
+)]
 #[graphql(complex)]
 pub struct Project {
     pub _id: ObjectId,
@@ -39,7 +41,8 @@ impl Project {
         ctx: &async_graphql::Context<'_>,
     ) -> GqlResult<File> {
         let db = &ctx.data_unchecked::<DataSource>().db;
-        super::services::file_by_kind_project_id(db, 1, self._id).await
+        super::services::file_by_kind_project_id(db, 1, self._id)
+            .await
     }
 
     pub async fn source_file(
@@ -47,7 +50,8 @@ impl Project {
         ctx: &async_graphql::Context<'_>,
     ) -> GqlResult<File> {
         let db = &ctx.data_unchecked::<DataSource>().db;
-        super::services::file_by_kind_project_id(db, 2, self._id).await
+        super::services::file_by_kind_project_id(db, 2, self._id)
+            .await
     }
 
     pub async fn content_html(&self) -> String {
@@ -82,7 +86,8 @@ impl Project {
         ctx: &async_graphql::Context<'_>,
     ) -> GqlResult<Category> {
         let db = &ctx.data_unchecked::<DataSource>().db;
-        categories::services::category_by_id(db, self.category_id).await
+        categories::services::category_by_id(db, self.category_id)
+            .await
     }
 
     pub async fn topics(
@@ -131,7 +136,9 @@ pub struct ProjectNew {
     pub status: i8,
 }
 
-#[derive(async_graphql::SimpleObject, Serialize, Deserialize, Clone, Debug)]
+#[derive(
+    async_graphql::SimpleObject, Serialize, Deserialize, Clone, Debug,
+)]
 pub struct File {
     pub _id: ObjectId,
     pub name: String,
@@ -146,7 +153,9 @@ pub struct FileNew {
     pub location: String,
 }
 
-#[derive(async_graphql::SimpleObject, Serialize, Deserialize, Clone, Debug)]
+#[derive(
+    async_graphql::SimpleObject, Serialize, Deserialize, Clone, Debug,
+)]
 pub struct ProjectFile {
     pub _id: ObjectId,
     pub user_id: ObjectId,

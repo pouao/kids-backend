@@ -10,7 +10,10 @@ use crate::users::{
 };
 use crate::projects::{
     self,
-    models::{Project, ProjectNew, File, FileNew, ProjectFile, ProjectFileNew},
+    models::{
+        Project, ProjectNew, File, FileNew, ProjectFile,
+        ProjectFileNew,
+    },
 };
 use crate::categories::{
     self,
@@ -19,7 +22,8 @@ use crate::categories::{
 use crate::topics::{
     self,
     models::{
-        Topic, TopicNew, TopicUser, TopicUserNew, TopicProject, TopicProjectNew,
+        Topic, TopicNew, TopicUser, TopicUserNew, TopicProject,
+        TopicProjectNew,
     },
 };
 
@@ -46,7 +50,10 @@ impl MutationRoot {
         token: String,
     ) -> GqlResult<User> {
         let db = &ctx.data_unchecked::<DataSource>().db;
-        users::services::user_change_password(db, pwd_cur, pwd_new, token).await
+        users::services::user_change_password(
+            db, pwd_cur, pwd_new, token,
+        )
+        .await
     }
 
     // update user profile
@@ -57,7 +64,8 @@ impl MutationRoot {
         token: String,
     ) -> GqlResult<User> {
         let db = &ctx.data_unchecked::<DataSource>().db;
-        users::services::user_update_profile(db, user_new, token).await
+        users::services::user_update_profile(db, user_new, token)
+            .await
     }
 
     // modify user's one field by its id
@@ -117,7 +125,8 @@ impl MutationRoot {
         project_file_new: ProjectFileNew,
     ) -> GqlResult<ProjectFile> {
         let db = &ctx.data_unchecked::<DataSource>().db;
-        projects::services::project_file_new(db, project_file_new).await
+        projects::services::project_file_new(db, project_file_new)
+            .await
     }
 
     // Add new category
@@ -137,7 +146,8 @@ impl MutationRoot {
         category_user_new: CategoryUserNew,
     ) -> GqlResult<CategoryUser> {
         let db = &ctx.data_unchecked::<DataSource>().db;
-        categories::services::category_user_new(db, category_user_new).await
+        categories::services::category_user_new(db, category_user_new)
+            .await
     }
 
     // Add new topic
@@ -177,7 +187,8 @@ impl MutationRoot {
         topic_project_new: TopicProjectNew,
     ) -> GqlResult<TopicProject> {
         let db = &ctx.data_unchecked::<DataSource>().db;
-        topics::services::topic_project_new(db, topic_project_new).await
+        topics::services::topic_project_new(db, topic_project_new)
+            .await
     }
 
     // Add new wish

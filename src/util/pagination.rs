@@ -9,7 +9,9 @@ use crate::util::constant::CFG;
 
 use crate::{users, projects};
 
-#[derive(async_graphql::SimpleObject, Serialize, Deserialize, Clone, Debug)]
+#[derive(
+    async_graphql::SimpleObject, Serialize, Deserialize, Clone, Debug,
+)]
 pub struct PageInfo {
     pub current_stuff: Option<String>,
     pub current_page: Option<u32>,
@@ -19,7 +21,9 @@ pub struct PageInfo {
     pub has_next_page: bool,
 }
 
-#[derive(async_graphql::SimpleObject, Serialize, Deserialize, Clone, Debug)]
+#[derive(
+    async_graphql::SimpleObject, Serialize, Deserialize, Clone, Debug,
+)]
 pub struct ResCount {
     pub pages_count: Option<u32>,
     pub total_count: Option<u64>,
@@ -36,7 +40,8 @@ pub async fn count_pages_and_total(
         .await
         .unwrap();
 
-    let page_size = CFG.get("PAGE_SIZE").unwrap().parse::<u64>().unwrap();
+    let page_size =
+        CFG.get("PAGE_SIZE").unwrap().parse::<u64>().unwrap();
     let pages_mod = total_count % page_size;
     let pages_count = match pages_mod {
         0 => total_count / page_size,
@@ -72,7 +77,8 @@ pub async fn find_options(
     sort_doc: Option<Document>,
     skip_x: u64,
 ) -> FindOptions {
-    let page_size = CFG.get("PAGE_SIZE").unwrap().parse::<i64>().unwrap();
+    let page_size =
+        CFG.get("PAGE_SIZE").unwrap().parse::<i64>().unwrap();
     let find_options = FindOptions::builder()
         .sort(sort_doc)
         .skip(skip_x * (page_size as u64))
@@ -82,14 +88,18 @@ pub async fn find_options(
     find_options
 }
 
-#[derive(async_graphql::SimpleObject, Serialize, Deserialize, Clone, Debug)]
+#[derive(
+    async_graphql::SimpleObject, Serialize, Deserialize, Clone, Debug,
+)]
 pub struct UsersResult {
     pub page_info: PageInfo,
     pub res_count: ResCount,
     pub current_items: Vec<users::models::User>,
 }
 
-#[derive(async_graphql::SimpleObject, Serialize, Deserialize, Clone, Debug)]
+#[derive(
+    async_graphql::SimpleObject, Serialize, Deserialize, Clone, Debug,
+)]
 pub struct ProjectsResult {
     pub page_info: PageInfo,
     pub res_count: ResCount,

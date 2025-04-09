@@ -2,8 +2,8 @@ use futures::stream::StreamExt;
 use mongodb::{
     Database,
     bson::{
-        oid::ObjectId, DateTime, Document, doc, from_document, to_document,
-        from_bson,
+        oid::ObjectId, DateTime, Document, doc, from_document,
+        to_document, from_bson,
     },
     options::FindOptions,
 };
@@ -55,7 +55,8 @@ pub async fn project_new(
 
         project_by_id(db, project_id).await
     } else {
-        let project: Project = from_document(exist_document.unwrap())?;
+        let project: Project =
+            from_document(exist_document.unwrap())?;
 
         Err(Error::new(bson_dt_nyr(project.created_at).await))
     }
@@ -116,8 +117,12 @@ pub async fn project_random_id(db: &Database) -> GqlResult<ObjectId> {
     };
 
     let match_doc = doc! {"$match": filter_doc};
-    let mut cursor =
-        coll.aggregate(vec![match_doc, doc! {"$sample": {"size": 1}}]).await?;
+    let mut cursor = coll
+        .aggregate(vec![
+            match_doc,
+            doc! {"$sample": {"size": 1}},
+        ])
+        .await?;
 
     if let Some(document_res) = cursor.next().await {
         let project: Project = from_document(document_res?)?;
@@ -140,7 +145,8 @@ pub async fn projects(
     filter_status(status, &mut filter_doc).await;
 
     let (pages_count, total_count) =
-        count_pages_and_total(&coll, Some(filter_doc.clone()), None).await;
+        count_pages_and_total(&coll, Some(filter_doc.clone()), None)
+            .await;
     let (current_page, skip_x) = calculate_current_filter_skip(
         from_page,
         first_oid,
@@ -152,7 +158,8 @@ pub async fn projects(
     let sort_doc = doc! {"_id": -1};
     let find_options = find_options(Some(sort_doc), skip_x).await;
 
-    let mut cursor = coll.find(filter_doc).with_options(find_options).await?;
+    let mut cursor =
+        coll.find(filter_doc).with_options(find_options).await?;
 
     let mut projects: Vec<Project> = vec![];
     while let Some(result) = cursor.next().await {
@@ -210,13 +217,16 @@ pub async fn projects_in_position(
 
     let mut filter_doc = doc! {};
     if "".ne(username.trim()) && "-".ne(username.trim()) {
-        let user = users::services::user_by_username(db, username).await?;
+        let user =
+            users::services::user_by_username(db, username).await?;
         filter_doc.insert("user_id", &user._id);
     }
 
     match position.trim() {
         // "managed" => filter_doc.insert("status", doc! {"$gte": 6}),
-        "recommended" => filter_doc.insert("status", doc! {"$gte": 2}),
+        "recommended" => {
+            filter_doc.insert("status", doc! {"$gte": 2})
+        }
         "published" => filter_doc.insert("status", doc! {"$gte": 1}),
         _ => None,
     };
@@ -224,7 +234,8 @@ pub async fn projects_in_position(
     let sort_doc = doc! {"_id": -1};
     let find_options =
         FindOptions::builder().sort(sort_doc).limit(limit).build();
-    let mut cursor = coll.find(filter_doc).with_options(find_options).await?;
+    let mut cursor =
+        coll.find(filter_doc).with_options(find_options).await?;
 
     let mut projects: Vec<Project> = vec![];
     while let Some(result) = cursor.next().await {
@@ -256,7 +267,8 @@ pub async fn projects_by_user_id(
     filter_status(status, &mut filter_doc).await;
 
     let (pages_count, total_count) =
-        count_pages_and_total(&coll, Some(filter_doc.clone()), None).await;
+        count_pages_and_total(&coll, Some(filter_doc.clone()), None)
+            .await;
     let (current_page, skip_x) = calculate_current_filter_skip(
         from_page,
         first_oid,
@@ -268,7 +280,8 @@ pub async fn projects_by_user_id(
     let sort_doc = doc! {"_id": -1};
     let find_options = find_options(Some(sort_doc), skip_x).await;
 
-    let mut cursor = coll.find(filter_doc).with_options(find_options).await?;
+    let mut cursor =
+        coll.find(filter_doc).with_options(find_options).await?;
 
     let mut projects: Vec<Project> = vec![];
     while let Some(result) = cursor.next().await {
@@ -316,9 +329,12 @@ pub async fn projects_by_username(
     last_oid: String,
     status: i8,
 ) -> GqlResult<ProjectsResult> {
-    let user = users::services::user_by_username(db, username).await?;
-    projects_by_user_id(db, user._id, from_page, first_oid, last_oid, status)
-        .await
+    let user =
+        users::services::user_by_username(db, username).await?;
+    projects_by_user_id(
+        db, user._id, from_page, first_oid, last_oid, status,
+    )
+    .await
 }
 
 // Get all projects by category_id
@@ -336,7 +352,8 @@ pub async fn projects_by_category_id(
     filter_status(status, &mut filter_doc).await;
 
     let (pages_count, total_count) =
-        count_pages_and_total(&coll, Some(filter_doc.clone()), None).await;
+        count_pages_and_total(&coll, Some(filter_doc.clone()), None)
+            .await;
     let (current_page, skip_x) = calculate_current_filter_skip(
         from_page,
         first_oid,
@@ -348,7 +365,8 @@ pub async fn projects_by_category_id(
     let sort_doc = doc! {"_id": -1};
     let find_options = find_options(Some(sort_doc), skip_x).await;
 
-    let mut cursor = coll.find(filter_doc).with_options(find_options).await?;
+    let mut cursor =
+        coll.find(filter_doc).with_options(find_options).await?;
 
     let mut projects: Vec<Project> = vec![];
     while let Some(result) = cursor.next().await {
@@ -398,7 +416,8 @@ pub async fn projects_by_category_slug(
     status: i8,
 ) -> GqlResult<ProjectsResult> {
     let category =
-        categories::services::category_by_slug(db, category_slug).await?;
+        categories::services::category_by_slug(db, category_slug)
+            .await?;
     projects_by_category_id(
         db,
         category._id,
@@ -419,7 +438,8 @@ pub async fn projects_by_topic_id(
     last_oid: String,
     status: i8,
 ) -> GqlResult<ProjectsResult> {
-    let topics_projects = topics_projects_by_topic_id(db, topic_id).await;
+    let topics_projects =
+        topics_projects_by_topic_id(db, topic_id).await;
 
     let mut project_ids = vec![];
     for topic_project in topics_projects {
@@ -434,7 +454,8 @@ pub async fn projects_by_topic_id(
     filter_status(status, &mut filter_doc).await;
 
     let (pages_count, total_count) =
-        count_pages_and_total(&coll, Some(filter_doc.clone()), None).await;
+        count_pages_and_total(&coll, Some(filter_doc.clone()), None)
+            .await;
     let (current_page, skip_x) = calculate_current_filter_skip(
         from_page,
         first_oid,
@@ -446,7 +467,8 @@ pub async fn projects_by_topic_id(
     let sort_doc = doc! {"_id": -1};
     let find_options = find_options(Some(sort_doc), skip_x).await;
 
-    let mut cursor = coll.find(filter_doc).with_options(find_options).await?;
+    let mut cursor =
+        coll.find(filter_doc).with_options(find_options).await?;
 
     let mut projects: Vec<Project> = vec![];
     while let Some(result) = cursor.next().await {
@@ -495,9 +517,12 @@ pub async fn projects_by_topic_slug(
     last_oid: String,
     status: i8,
 ) -> GqlResult<ProjectsResult> {
-    let topic = topics::services::topic_by_slug(db, topic_slug).await?;
-    projects_by_topic_id(db, topic._id, from_page, first_oid, last_oid, status)
-        .await
+    let topic =
+        topics::services::topic_by_slug(db, topic_slug).await?;
+    projects_by_topic_id(
+        db, topic._id, from_page, first_oid, last_oid, status,
+    )
+    .await
 }
 
 // get all TopicProject list by topic_id
@@ -533,23 +558,33 @@ async fn topics_projects_by_topic_id(
 }
 
 // Create new file
-pub async fn file_new(db: &Database, file_new: FileNew) -> GqlResult<File> {
+pub async fn file_new(
+    db: &Database,
+    file_new: FileNew,
+) -> GqlResult<File> {
     let coll = db.collection::<Document>("files");
 
     let new_document = to_document(&file_new)?;
 
-    let file_res = coll.insert_one(new_document).await.expect("写入未成功");
+    let file_res =
+        coll.insert_one(new_document).await.expect("写入未成功");
     let file_id = from_bson(file_res.inserted_id)?;
 
     file_by_id(db, file_id).await
 }
 
 // get file by id
-pub async fn file_by_id(db: &Database, id: ObjectId) -> GqlResult<File> {
+pub async fn file_by_id(
+    db: &Database,
+    id: ObjectId,
+) -> GqlResult<File> {
     let coll = db.collection::<Document>("files");
 
-    let file_document =
-        coll.find_one(doc! {"_id": id}).await.expect("查询未成功").unwrap();
+    let file_document = coll
+        .find_one(doc! {"_id": id})
+        .await
+        .expect("查询未成功")
+        .unwrap();
 
     let file: File = from_document(file_document)?;
     Ok(file)
@@ -572,7 +607,8 @@ pub async fn project_file_new(
         let new_document = to_document(&project_file_new)?;
         let project_file_res =
             coll.insert_one(new_document).await.expect("写入未成功");
-        let project_file_id = from_bson(project_file_res.inserted_id)?;
+        let project_file_id =
+            from_bson(project_file_res.inserted_id)?;
 
         project_file_by_id(db, project_file_id).await
     } else {
@@ -587,10 +623,14 @@ async fn project_file_by_id(
 ) -> GqlResult<ProjectFile> {
     let coll = db.collection::<Document>("projects_files");
 
-    let project_file_document =
-        coll.find_one(doc! {"_id": id}).await.expect("查询未成功").unwrap();
+    let project_file_document = coll
+        .find_one(doc! {"_id": id})
+        .await
+        .expect("查询未成功")
+        .unwrap();
 
-    let project_file: ProjectFile = from_document(project_file_document)?;
+    let project_file: ProjectFile =
+        from_document(project_file_document)?;
     Ok(project_file)
 }
 
@@ -599,7 +639,8 @@ pub async fn files_by_project_id(
     db: &Database,
     project_id: ObjectId,
 ) -> GqlResult<Vec<File>> {
-    let projects_files = projects_files_by_project_id(db, project_id).await;
+    let projects_files =
+        projects_files_by_project_id(db, project_id).await;
 
     let mut file_ids = vec![];
     for project_file in projects_files {
@@ -633,13 +674,15 @@ pub async fn file_by_kind_project_id(
     file_kind: i8,
     project_id: ObjectId,
 ) -> GqlResult<File> {
-    let projects_files = projects_files_by_project_id(db, project_id).await;
+    let projects_files =
+        projects_files_by_project_id(db, project_id).await;
 
     let mut file_ids = vec![];
     for project_file in projects_files {
         file_ids.push(project_file.file_id);
     }
-    let filter_doc = doc! {"_id": {"$in": file_ids}, "kind": file_kind as i32};
+    let filter_doc =
+        doc! {"_id": {"$in": file_ids}, "kind": file_kind as i32};
 
     let coll = db.collection::<Document>("files");
     let file_document =
@@ -654,7 +697,8 @@ async fn projects_files_by_project_id(
     db: &Database,
     project_id: ObjectId,
 ) -> Vec<ProjectFile> {
-    let coll_projects_files = db.collection::<Document>("projects_files");
+    let coll_projects_files =
+        db.collection::<Document>("projects_files");
     let mut cursor_projects_files = coll_projects_files
         .find(doc! {"project_id": project_id})
         .await

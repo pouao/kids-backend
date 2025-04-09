@@ -13,7 +13,9 @@ use crate::{
     projects::services::projects_by_user_id,
 };
 
-#[derive(async_graphql::SimpleObject, Serialize, Deserialize, Clone, Debug)]
+#[derive(
+    async_graphql::SimpleObject, Serialize, Deserialize, Clone, Debug,
+)]
 #[graphql(complex)]
 pub struct User {
     pub _id: ObjectId,
@@ -121,13 +123,17 @@ pub struct UserNew {
     pub status: i8,
 }
 
-#[derive(async_graphql::SimpleObject, Serialize, Deserialize, Clone, Debug)]
+#[derive(
+    async_graphql::SimpleObject, Serialize, Deserialize, Clone, Debug,
+)]
 pub struct SignInfo {
     pub username: String,
     pub token: String,
 }
 
-#[derive(async_graphql::SimpleObject, Serialize, Deserialize, Clone, Debug)]
+#[derive(
+    async_graphql::SimpleObject, Serialize, Deserialize, Clone, Debug,
+)]
 #[graphql(complex)]
 pub struct Wish {
     pub _id: ObjectId,
