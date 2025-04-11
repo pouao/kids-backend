@@ -9,10 +9,15 @@ futures = "0.3"
 tokio = { version = "1.44", features = ["macros", "rt-multi-thread"] }
 axum = "0.8"
 
-dotenvy = "0.15"
-lazy_static = "1.5"
+tower = "0.5"
+tower-http = { version = "0.6", features = [
+  "compression-full",
+  "decompression-full",
+] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+dotenvy = "0.15"
+lazy_static = "1.5"
 
 async-graphql = { version = "7.0", features = ["bson", "chrono"] }
 async-graphql-axum = "7.0"

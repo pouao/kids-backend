@@ -3,6 +3,3 @@ array_width = 30
 
 reorder_modules = false
 reorder_imports = false
-
-error_on_unformatted = false
-error_on_line_overflow = false
