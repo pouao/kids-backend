@@ -1,11 +1,6 @@
 use std::sync::Arc;
 use axum::{Router, routing::get};
 use async_graphql_axum::GraphQL;
-use tower::ServiceBuilder;
-use tower_http::{
-    compression::CompressionLayer,
-    decompression::RequestDecompressionLayer,
-};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use kids_backend::util::constant::CFG;
@@ -26,17 +21,10 @@ async fn main() {
 
     let schema = build_schema().await;
     let app_state = Arc::new(AppState {});
-    let app_router = Router::new()
-        .route(
-            CFG.get("GQL_PATH").unwrap(),
-            get(giql).post_service(GraphQL::new(schema)),
-        )
-        .with_state(app_state)
-        .layer(
-            ServiceBuilder::new()
-                .layer(RequestDecompressionLayer::new())
-                .layer(CompressionLayer::new()),
-        );
+    let app_router = Router::new().with_state(app_state).route(
+        CFG.get("GQL_PATH").unwrap(),
+        get(giql).post_service(GraphQL::new(schema)),
+    );
 
     let listener = tokio::net::TcpListener::bind(format!(
         "{}:{}",
