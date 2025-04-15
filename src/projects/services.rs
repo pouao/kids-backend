@@ -109,11 +109,11 @@ pub async fn project_update_one_field_by_id(
 pub async fn project_random_id(db: &Database) -> GqlResult<ObjectId> {
     let coll = db.collection::<Document>("projects");
 
-    let now = DateTime::now();
-    let days_before = now.to_chrono() + Duration::days(-7);
+    // let now = DateTime::now();
+    // let days_before = now.to_chrono() + Duration::days(-777);
     let filter_doc = doc! {
         "status": {"$gte": 1},
-        "updated_at": {"$gte": days_before}
+        // "updated_at": {"$gte": days_before}
     };
 
     let match_doc = doc! {"$match": filter_doc};
