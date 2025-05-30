@@ -1,7 +1,7 @@
 pub mod queries;
 pub mod mutations;
 
-use axum::response::{self, IntoResponse};
+use axum::response::{Html, IntoResponse};
 use async_graphql::{Schema, EmptySubscription, http::GraphiQLSource};
 
 use crate::util::constant::CFG;
@@ -22,7 +22,7 @@ pub async fn build_schema()
 }
 
 pub async fn giql() -> impl IntoResponse {
-    response::Html(
+    Html(
         GraphiQLSource::build()
             .endpoint(CFG.get("GQL_PATH").unwrap())
             .finish(),

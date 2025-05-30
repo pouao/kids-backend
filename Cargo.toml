@@ -6,7 +6,7 @@ edition = "2024"
 
 [dependencies]
 futures = "0.3"
-tokio = { version = "1.44", features = ["macros", "rt-multi-thread"] }
+tokio = { version = "1.45", features = ["macros", "rt-multi-thread"] }
 axum = "0.8"
 
 tracing = "0.1"
@@ -27,9 +27,6 @@ base64 = "0.22"
 
 deunicode = "1.6"
 pulldown-cmark = { version = "0.13", features = ["simd"] }
-
-[workspace]
-resolver = "2"
 
 [profile.dev]
 split-debuginfo = "unpacked"
