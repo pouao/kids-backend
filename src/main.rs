@@ -3,8 +3,10 @@ use axum::{Router, routing::get};
 use async_graphql_axum::GraphQL;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
-use kids_backend::util::constant::CFG;
-use kids_backend::gql::{build_schema, giql};
+use kids_backend::{
+    util::constant::CFG,
+    gql::{build_schema, giql},
+};
 
 #[tokio::main]
 async fn main() {
